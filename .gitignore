@@ -1,0 +1,10 @@
+/build
+/compare_eml.py
+/compare_txt.py
+/dist
+/extract_PST.py
+/find_word_in_emails.py
+/new_list_emails.py
+/read_pdf.py
+/testgui.spec
+/__pycache__
