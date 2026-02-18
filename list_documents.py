@@ -114,9 +114,11 @@ def export_folder_contents_to_excel(folder_path, index_output_path, extract_emai
             if item.is_file():  # Only include files, not directories
                 # Get the relative path of the file
                 relative_path = item.relative_to(folder_path).as_posix()
+                ebrief_number = ""
                 
                 if ebrief:
                     item_name, ebrief_number = strip_ebrief_prefix(item.name)
+                    item_name = item.name
                 else:
                     item_name = item.name
 
