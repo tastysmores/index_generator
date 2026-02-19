@@ -39,12 +39,18 @@ def parse_email_address(address):
 
     if address is not None:
 
-        contact_name = address.split("<", 1)[0]
-        email_address = address.split("<", 1)[1].rstrip(">")
+        if "<" in address:
 
-        email_address = decode_imceaex(email_address)
+            contact_name = address.split("<", 1)[0]
+            email_address = address.split("<", 1)[1].rstrip(">")
 
-        contact_name = contact_name.strip()
+            email_address = decode_imceaex(email_address)
+
+            contact_name = contact_name.strip()
+
+        else:
+            contact_name = address
+            email_address = "(No Email)"
 
 
     else:
@@ -53,7 +59,17 @@ def parse_email_address(address):
 
     return contact_name, email_address
 
-
+def parse_dt(s):
+    for fmt in (
+        "%Y-%m-%d %H:%M:%S.%f%z",
+        "%Y-%m-%d %H:%M:%S%z",
+        "%a, %d %b %Y %H:%M:%S %z",
+    ):
+        try:
+            return datetime.strptime(s, fmt)
+        except ValueError:
+            pass
+    raise ValueError(f"Unrecognized datetime format: {s}")
 
 def extract_email_fields_from_eml(eml_file):
     try:
@@ -61,12 +77,12 @@ def extract_email_fields_from_eml(eml_file):
             msg = BytesParser(policy=policy.default).parse(f)
         
         # Extract email fields
-        received_date = msg.get('Date') #or "(No Date)"
-        subject = msg.get('Subject') #or "(No Subject)"
-        sender_name, sender_email = parse_email_address(msg.get('From')) #or "(No Sender)"
-        recipient_name, recipient_email = parse_email_address(msg.get('To')) #or "(No Recipients)"
-        cc_name, cc_email = parse_email_address(msg.get('Cc')) #or "(No CC)"
-        bcc_name, bcc_email = parse_email_address(msg.get('Bcc')) #or "(No BCC)"
+        received_date = msg.get('Date') or "(No Date)"
+        subject = msg.get('Subject') or "(No Subject)"
+        sender_name, sender_email = parse_email_address(msg.get('From')) or "(No Sender)"
+        recipient_name, recipient_email = parse_email_address(msg.get('To')) or "(No Recipients)"
+        cc_name, cc_email = parse_email_address(msg.get('Cc')) or "(No CC)"
+        bcc_name, bcc_email = parse_email_address(msg.get('Bcc')) or "(No BCC)"
         
         return received_date, subject, sender_name, sender_email, recipient_name, recipient_email, cc_name, cc_email, bcc_name, bcc_email
     except Exception as e:
@@ -78,13 +94,15 @@ def extract_email_fields_from_msg(msg_file):
         msg = Message(msg_file)
 
         # Extract email fields
-        received_date = msg.date #or "(No Date)"
+        received_date = msg.date or "(No Date)"
         
-        subject = msg.subject #or "(No Subject)"
-        sender_name, sender_email = parse_email_address(msg.sender)# or "(No Sender)"
-        recipient_name, recipient_email = parse_email_address(msg.to) #or "(No Recipients)"
-        cc_name, cc_email = parse_email_address(msg.cc) #or "(No CC)"
-        bcc_name, bcc_email = parse_email_address(msg.bcc) #or "(No BCC)"
+        subject = msg.subject or "(No Subject)"
+        subject = subject.strip()
+
+        sender_name, sender_email = parse_email_address(msg.sender) or "(No Sender)"
+        recipient_name, recipient_email = parse_email_address(msg.to) or "(No Recipients)"
+        cc_name, cc_email = parse_email_address(msg.cc) or "(No CC)"
+        bcc_name, bcc_email = parse_email_address(msg.bcc) or "(No BCC)"
         
         return received_date, subject, sender_name, sender_email, recipient_name, recipient_email, cc_name, cc_email, bcc_name, bcc_email
     except Exception as e:
@@ -114,9 +132,11 @@ def export_folder_contents_to_excel(folder_path, index_output_path, extract_emai
             if item.is_file():  # Only include files, not directories
                 # Get the relative path of the file
                 relative_path = item.relative_to(folder_path).as_posix()
+                
+                
                 ebrief_number = ""
                 
-                if ebrief:
+                if ebrief and "LR" in item.name:
                     item_name, ebrief_number = strip_ebrief_prefix(item.name)
                     item_name = item.name
                 else:
@@ -127,26 +147,30 @@ def export_folder_contents_to_excel(folder_path, index_output_path, extract_emai
                     received_date, subject, sender_name, sender_email, recipient_name, recipient_email, cc_name, cc_email, bcc_name, bcc_email = extract_email_fields_from_eml(item)
                     
                     if "error" not in str(received_date).lower():
-                        received_date_datetime = datetime.strptime(str(received_date), "%a, %d %b %Y %H:%M:%S %z")
+                        #received_date_datetime = datetime.strptime(str(received_date), "%a, %d %b %Y %H:%M:%S %z")
+                        received_date_datetime = parse_dt(str(received_date))
                         received_date_datetime = received_date_datetime.astimezone(timezone('Australia/Melbourne'))
                         received_date_string = received_date_datetime.strftime("%a, %d %b %Y %H:%M:%S")
 
-                        suggested_file_name = ebrief_number + " Email from " + sender_name + " to " + recipient_name + " on " + received_date_datetime.strftime("%d %B %Y" + ".eml")
+                        suggested_file_name = received_date_datetime.strftime("%Y-%m-%d") + " - Email from " + sender_name + " to " + recipient_name + " '" + subject + "'" + ".eml"
                     #print(received_date_datetime)
                     else:
                         suggested_file_name = item.name
+                        received_date_string = "(Error extracting date)"
                     
                     #suggested_name = "Email from " + sender_name + " to " + recipient_name + " on " + str(received_date)
                 elif extract_email_details and item.suffix.lower() == '.msg':
                     received_date, subject, sender_name, sender_email, recipient_name, recipient_email, cc_name, cc_email, bcc_name, bcc_email = extract_email_fields_from_msg(item)
                     
                     if "error" not in str(received_date).lower():
-                        received_date_datetime = datetime.strptime(str(received_date), "%Y-%m-%d %H:%M:%S%z")
+                        #received_date_datetime = datetime.strptime(str(received_date), "%Y-%m-%d %H:%M:%S%z")
+                        received_date_datetime = parse_dt(str(received_date))
                         received_date_datetime = received_date_datetime.astimezone(timezone('Australia/Melbourne'))
                         received_date_string = received_date_datetime.strftime("%a, %d %b %Y %H:%M:%S")
-                        suggested_file_name = ebrief_number + " Email from " + sender_name + " to " + recipient_name + " on " + received_date_datetime.strftime("%d %B %Y" + ".msg")
+                        suggested_file_name = received_date_datetime.strftime("%Y-%m-%d") + " - Email from " + sender_name + " to " + recipient_name + " '" + subject + "'" + ".msg"
                     else:
                         suggested_file_name = item.name
+                        received_date_string = "(Error extracting date)"
                 else:
                     received_date_string = "(Not an email)"
                     subject = "(Not an email)"

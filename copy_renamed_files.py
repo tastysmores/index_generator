@@ -2,6 +2,27 @@ import os
 import shutil
 import pandas as pd
 from pathlib import Path
+import re
+
+
+def strip_invalid_characters(name: str, max_length: int = 200) -> str:
+    # Remove invalid Windows characters
+    name = re.sub(r'[<>:"/\\|?*]', '_', name)
+    
+    # Remove control characters (newlines, tabs, etc.)
+    name = re.sub(r'[\x00-\x1f]', '', name)
+    
+    # Remove trailing spaces and dots
+    name = name.rstrip(' .')
+    
+    return name[:max_length]
+
+def get_unique_path(path):
+    counter = 1
+    while path.exists():
+        path = path.with_name(f"{path.stem} ({counter}){path.suffix}")
+        counter += 1
+    return path
 
 def copy_renamed_files(excel_file, source_root, destination_root):
     # Load the Excel file
@@ -18,8 +39,11 @@ def copy_renamed_files(excel_file, source_root, destination_root):
         original_path = source_root / Path(row['Relative Path'])
         original_path_parent = Path(row['Relative Path']).parent
         
-        new_name = row['New File Name']
+        new_name = strip_invalid_characters(row['New File Name'])
+
         destination_path = destination_root / original_path_parent / new_name
+
+        destination_path = get_unique_path(destination_path)
         #print(original_path)
         #print(new_path)
                 
@@ -32,6 +56,7 @@ def copy_renamed_files(excel_file, source_root, destination_root):
 
             # Copy the .eml file
             destination_path.parent.mkdir(parents=True, exist_ok=True)
+            
             shutil.copy2(original_path, destination_path)
 
             # Check for and copy the associated subfolder

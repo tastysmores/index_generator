@@ -3,6 +3,7 @@ import list_documents
 from pathlib import Path
 from copy_renamed_files import copy_renamed_files
 
+
 class GenerateIndexPanel(wx.Panel):
     def __init__(self, parent):
         super().__init__(parent)
@@ -83,7 +84,7 @@ class GenerateIndexPanel(wx.Panel):
 
                 if dlg.ShowModal() == wx.ID_OK:
                     self.save_label.SetLabel("Wait...")
-                    list_documents.export_folder_contents_to_excel(parent_frame.folder_path, dlg.GetPath(), self.checkbox.IsChecked(), True)
+                    list_documents.export_folder_contents_to_excel(parent_frame.folder_path, dlg.GetPath(), self.checkbox.IsChecked(), False)
                     self.save_label.SetLabel("Index created successfully at " + dlg.GetPath())
                     parent_frame.index_path = dlg.GetPath()
                     parent_frame.index_set = True
