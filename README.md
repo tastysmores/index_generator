@@ -1,6 +1,6 @@
-===================================================
+=====================================
 WARNING: VERY ALPHA SOFTWARE - DO NOT USE FOR SENSITIVE TASKS
-===================================================
+
 
 This software is a very basic tool for making and manipulating indexes of folders on, currently, Windows computers.
 
