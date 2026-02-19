@@ -1,6 +1,5 @@
-=====================================
 WARNING: VERY ALPHA SOFTWARE - DO NOT USE FOR SENSITIVE TASKS
-
+=================================================
 
 This software is a very basic tool for making and manipulating indexes of folders on, currently, Windows computers.
 
@@ -15,9 +14,10 @@ The program is a series of basic python files, wrapped with a wxPython GUI. It i
 
 Just to be clear: this is not the most intelligent software out there. It does not rely on an LLM to read a document, intuit its contents and come up with a file name. Instead, it provides the user with a platform to be able to easily and flexibly traverse large sets of documents and, if it would be helpful, rename those files.
 
-===================================================
+
 Why did you make this?
-===================================================
+=================================================
+
 
 The purpose for the software was to solve three very specific problems:
 
@@ -27,9 +27,9 @@ The purpose for the software was to solve three very specific problems:
 
 You might think this is not a common problem, but believe me - in certain industries (especially the law) this is _very_ common.  Seeing one too many junior lawyers creating an index table from scratch for a discovery exercise is what finally triggered me to write this code.
 
-===================================================
 Did you use AI to assist in creating the code
-===================================================
+=================================================
+
 
 Yes.  There are many aspects of programming process that are frustrating, and which LLMs are particularly well suited for.  For example:
 
@@ -37,9 +37,11 @@ Yes.  There are many aspects of programming process that are frustrating, and wh
 2) Quickly being able to come up with simple 'helper' functions, such as being able to remove problematic characters from file name strings. These are very common pieces of code that LLMs can pluck out of their data sets very easily, but which finding out in the wild may be quite difficult.
 3) Finally, programming is not my job.  I am reasonably adept in Python, and while I have proven to myself I can certainly work out how to write the code from scratch without LLM assistance, in some circumstances it is too slow. In this case, I needed this code for some paid work, and as much as I would have been intellectually satisfied with the outcome had I coded it entirely from scratch, in practice I needed the code to 'get out of the way' so that I could get on with my value add.
 
-===================================================
+
+
 What is there left to do
-===================================================
+=================================================
+
 
 Gosh, so much.
 
@@ -54,9 +56,9 @@ The current 0.1 roadmap is as follows:
 7) Make the interface prettier
 8) And no doubt more...
 
-===================================================
+
 License
-===================================================
+=================================================
 
 Please use this code if it is helpful for you - my only request is that it doesn't make its way into some closed-source project that people charge for. It is also not good enough to make it into some commercial code - if you would like to sell a product like this, please go and make something better from scratch.
 
